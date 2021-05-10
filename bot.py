@@ -2,13 +2,14 @@ import requests
 import json
 import discord
 import asyncio
+import os
 
-# Discord Instance.
 client = discord.Client()
 
-# players.json endpoint is here
-endpoint = "http://[IP/Domain]/players.json"
+# Debug Mode
+debug = False
 
+endpoint = "http://[IP/Domain]/players.json"
 
 # Iterate over JSON array and parse the count of all players.
 def onlinePlayers():
@@ -21,20 +22,30 @@ def onlinePlayers():
 
 		return len(online_players)
 
-
 @client.event
 async def on_ready():
-		await client.change_presence(activity=discord.Game(name='Initialized'))
+		print("[!] Connected Successfully!")
+		print("[*] Bot is running!\n")
 
+		if debug:
+			print("[+] Logged in as:" , client.user, end='\n\n')
+		await client.change_presence(activity=discord.Game(name='Initialized'))
 
 async def change():
 	await client.wait_until_ready()
 	while not client.is_closed():
 		currentOnline = onlinePlayers()
 		currentStatus = 'Online: {}/64'.format(str(currentOnline))
+
+		if debug:
+			print("[*] Current Player Count:", str(currentOnline), end='\r')
 		
 		await client.change_presence(activity=discord.Game(name=currentStatus))
-		await asyncio.sleep(2)
+		await asyncio.sleep(15)
 
-client.loop.create_task(change())
-client.run(os.getenv('DISCORD_TOKEN'))
+try:
+	client.loop.create_task(change())
+	# Place token here or set environment variable with: 'export DISCORD_TOKEN="token_here"
+	client.run(os.getenv('DISCORD_TOKEN'))
+except:
+	exit()
