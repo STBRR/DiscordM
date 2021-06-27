@@ -14,13 +14,17 @@ endpoint = "http://[IP/Domain]/players.json"
 # Iterate over JSON array and parse the count of all players.
 def onlinePlayers():
 	while(True):
-		response = requests.get(endpoint).json()
-		online_players = []
+		try:
+			response = requests.get(endpoint).json()
+			online_players = []
 
-		for user in response:
-			online_players.append(user['name'])
+			for user in response:
+				online_players.append(user['name'])
 
-		return len(online_players)
+			return len(online_players)
+		except:
+			time.sleep(3)
+			os.system("python3 bot.py")
 
 @client.event
 async def on_ready():
