@@ -19,5 +19,8 @@
 4. Returns the total count of players which are currently online
 5. Updates the bots status with how many players are online
 
+#### Screenshot
+![](https://i.imgur.com/QxhZ8Zi.png)
+
 *I couldn't really find a simple script that could do as i wanted without too much hassle. A lot of the scripts i found online were written using NodeJS and required some setup so decided to write my own. It's a bit 'hacky' but it does the job!*
 
