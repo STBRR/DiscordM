@@ -4,6 +4,7 @@ import json
 import discord
 import asyncio
 import argparse
+import time
 
 client = discord.Client()
 parser = argparse.ArgumentParser()
@@ -25,6 +26,15 @@ parser.add_argument(
 	help="port of your server (default: 30120)"
 )
 
+parser.add_argument(
+	'--timeout', 
+	'-T',
+	type=int, 
+	required=False,
+	default='30',
+	help="timeout on how often the bot should update (default: 30s)"
+)
+
 arguments = parser.parse_args()
 server_endpoint = f'http://{arguments.server}:{arguments.port}/players.json'
 
@@ -35,16 +45,22 @@ else:
 
 # Iterate over JSON array and parse the count of all players.
 def onlinePlayers():
-	while(True):
-		try:
-			response = requests.get(server_endpoint, timeout=5).json()
+	try:
+		while(True):
+			try:
+				response = requests.get(server_endpoint, timeout=5).json()
+			except:
+				print(f"[!] Error. Requesting {server_endpoint}. Check your connection.")
+				exit(0)
+
 			online_players = []
 
 			for player in response:
 				online_players.append(player['name'])
-			return len(online_players)
-		except:
-			exit(f"[!] Error. Requesting {server_endpoint}. Check your connection.")
+			
+			return online_players
+	except:
+		exit()
 
 @client.event
 async def on_ready():
@@ -55,16 +71,24 @@ async def on_ready():
 async def change():
 	await client.wait_until_ready()
 	while not client.is_closed():
-		currentOnline = onlinePlayers()
+		serverData = onlinePlayers()
+		currentOnline = len(serverData)
 		currentStatus = 'Online: {}/64'.format(str(currentOnline))
 
-		print("[*] Player(s):", str(currentOnline), end='\r')
+		print("[*] Total Player(s):", str(currentOnline), end='\n\n')
+
+		index = 1
+		for player in serverData:
+			print(str(index) + ":" + player)
+			index += 1
 		
 		await client.change_presence(activity=discord.Game(name=currentStatus))
-		await asyncio.sleep(30)
+		await asyncio.sleep(arguments.timeout)
 
 try:
 	client.loop.create_task(change())
+	time.sleep(1)
 	client.run(getenv('DISCORDM'))
-except:
-	exit('[!] Error. Closing down bot.')
+	
+except discord.errors.LoginFailure:
+	exit('Error. Invalid Token. Please Verify and try again.')
