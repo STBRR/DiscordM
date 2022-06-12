@@ -35,6 +35,15 @@ parser.add_argument(
 	help="timeout on how often the bot should update (default: 30s)"
 )
 
+parser.add_argument(
+	'--players', 
+	'-Pc',
+	type=int, 
+	required=False,
+	default='64',
+	help="max amount of players for your  server (default: 64)"
+)
+
 arguments = parser.parse_args()
 server_endpoint = f'http://{arguments.server}:{arguments.port}/players.json'
 
@@ -73,7 +82,7 @@ async def change():
 	while not client.is_closed():
 		serverData = onlinePlayers()
 		currentOnline = len(serverData)
-		currentStatus = 'Online: {}/64'.format(str(currentOnline))
+		currentStatus = 'Online: {}/{}'.format(str(currentOnline), str(arguments.players))
 
 		print("[*] Total Player(s):", str(currentOnline), end='\n\n')
 
